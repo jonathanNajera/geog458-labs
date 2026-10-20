@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>World Cities and Megacities</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        #title {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 3px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #legend {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 170px;
+            background: white;
+            margin-right: 20px;
+            margin-bottom: 40px;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .break { position: relative; margin: 5px 0; min-height: 32px; }
+        .dot {
+            display: inline-block;
+            vertical-align: middle;
+            border-radius: 50%;
+            border: 1px solid white;
+        }
+        .dot-label { display: inline-block; vertical-align: middle; margin-left: 8px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="title">World Cities: Megacities (10 Million+)</div>
+    <div id="legend"></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1Ijoiam9uYXRoYW4yNTMiLCJhIjoiY212Nnc2bndpMDJieTM0cWEyZWJlYm1nYSJ9.IsBi7uelpGVQ-psYYpeSGg';
+        const mymap = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v11',
+            projection: 'globe',
+            center: [0, 20],
+            zoom: 1.5
+        });
+
+        mymap.on('style.load', () => {
+            mymap.setFog({});
+        });
+
+        
+        const population = ['case', ['==', ['get', 'population'], null], -1,
+            ['to-number', ['get', 'population'], -1]];
+
+        mymap.on('load', () => {
+            mymap.addSource('population', {
+                type: 'geojson',
+                data: 'data/world-cities.geojson'
+            });
+            mymap.addLayer({
+                id: 'cities-layer',
+                type: 'circle',
+                source: 'population',
+                paint: {
+                    'circle-radius': ['step', population, 3, 0, 4, 100000, 6, 1000000, 9, 10000000, 15],
+                    'circle-color': ['step', population, '#777777', 0, '#a6cee3', 100000, '#1f78b4', 1000000, '#08306b', 10000000, '#e31a1c'],
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': 'white'
+                }
+            });
+        });
+        
+
+        mymap.on('click', 'cities-layer', (event) => {
+            const feature = event.features[0];
+            const name = feature.properties.accentcity || feature.properties.city || 'Unknown city';
+            const value = feature.properties.population;
+            const count = value == null ? NaN : Number(value);
+            const display = Number.isFinite(count) && count >= 0
+                ? count.toLocaleString() : 'Unavailable';
+
+            new mapboxgl.Popup()
+                .setLngLat(feature.geometry.coordinates.slice(0, 2))
+                .setText(`${name} — Population: ${display}`)
+                .addTo(mymap);
+        });
+
+        const legend = document.getElementById('legend');
+        const labels = ['<strong>City population</strong>'];
+        const names = ['Under 100,000', '100,000–999,999', '1 million–9,999,999',
+            '10 million or more', 'Unavailable'];
+        const radii = [4, 6, 9, 15, 3];
+        const colors = ['#a6cee3', '#1f78b4', '#08306b', '#e31a1c', '#777777'];
+
+        for (let i = 0; i < names.length; i++) {
+            const diameter = 2 * radii[i];
+            labels.push('<p class="break"><i class="dot" style="background:' + colors[i] +
+                '; width:' + diameter + 'px; height:' + diameter +
+                'px;"></i><span class="dot-label">' + names[i] + '</span></p>');
+        }
+        labels.push('<small>Source: course world-cities.geojson (Natural Earth)</small>');
+        legend.innerHTML = labels.join('');
+    </script>
+</body>
+</html>
