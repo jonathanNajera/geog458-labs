@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>King County Traffic Camera Coverage</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+  <style>
+    body { margin: 0; font: 14px/1.5 Arial, sans-serif; color: #182e3a; }
+    #map { position: absolute; inset: 0; }
+    #panel { position: absolute; top: 12px; left: 12px; padding: 16px;
+      width: 270px; max-width: calc(100% - 100px); background: white;
+      max-height: calc(100% - 80px); overflow: auto; border-radius: 6px;
+      box-shadow: 0 1px 8px #0002; }
+    h1 { margin: 0 0 8px; font-size: 19px; }
+    p { margin: 8px 0; }
+    .ramp { height: 14px; background: linear-gradient(to right,
+      #ffffb2, #fecc5c, #fd8d3c, #f03b20, #bd0026); }
+    .values { display: flex; justify-content: space-between; }
+    .maplibregl-popup-content { white-space: pre-line; max-width: 300px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <section id="panel">
+    <h1>King County Traffic Camera Coverage</h1>
+    <p>Seattle study area | Camera locations and tract counts 
+        Why is this important? Traffic cameras are used for traffic monitoring, law enforcement, and public safety. Understanding their distribution can help in urban planning and traffic management.
+    </p>
+    <p id="status">Loading local map tiles and camera data…</p>
+    <div id="raster-control" hidden>
+      <label><input id="show-raster" type="checkbox" checked>
+        Show cameras-per-tract raster</label>
+    </div>
+    <div id="camera-control" hidden>
+      <label><input id="show-cameras" type="checkbox" checked>
+        Show camera points</label>
+    </div>
+    <div id="legend" hidden>
+      <p><strong>Traffic cameras per census tract</strong></p>
+      <div class="ramp"></div>
+      <div class="values"><span>Fewer</span><span>More</span></div>
+      <p>Color shows camera counts by tract; points mark individual cameras.</p>
+    </div>
+  </section>
+
+  <script type="module">
+    import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+
+    // Assumes a Seattle-area export. Update center/bounds to match your QGIS export.
+    const studyBounds = [-122.45, 47.48, -122.22, 47.75];
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: {
+        version: 8,
+        sources: {},
+        layers: [{ id: 'background', type: 'background',
+          paint: { 'background-color': '#edf1f0' } }]
+      },
+      center: [-122.335, 47.61],
+      zoom: 10,
+      minZoom: 8,
+      maxZoom: 12,
+      maxBounds: [[studyBounds[0], studyBounds[1]], [studyBounds[2], studyBounds[3]]]
+    });
+    map.addControl(new maplibregl.NavigationControl());
+    map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }));
+
+    map.on('error', (event) => {
+      document.getElementById('status').textContent =
+        'Load error: check tile/data paths and the browser Console.';
+      console.error(event.error);
+    });
+
+    map.on('load', () => {
+      map.addSource('basemap-tiles', {
+        type: 'raster',
+        tiles: ['assets2/mapbox-independent/{z}/{x}/{y}.png'],
+        tileSize: 256,
+        scheme: 'xyz',
+        minzoom: 8,
+        maxzoom: 12,
+        bounds: studyBounds,
+        attribution: '© Mapbox © OpenStreetMap contributors'
+      });
+      map.addLayer({
+        id: 'basemap', type: 'raster', source: 'basemap-tiles',
+        paint: { 'raster-opacity': 1, 'raster-fade-duration': 0 }
+      });
+
+      map.addSource('camera-count-tiles', {
+        type: 'raster',
+        tiles: ['assets2/camera-guided/{z}/{x}/{y}.png'],
+        tileSize: 256,
+        scheme: 'xyz',
+        minzoom: 8,
+        maxzoom: 12,
+        bounds: studyBounds,
+        attribution: 'Camera counts: census-tract analysis of Seattle ATSC locations; map by Jonathan Najera'
+      });
+      map.addLayer({
+        id: 'camera-count-raster', type: 'raster', source: 'camera-count-tiles',
+        paint: { 'raster-opacity': 0.7, 'raster-fade-duration': 0 }
+      });
+
+      document.getElementById('raster-control').hidden = false;
+      document.getElementById('legend').hidden = false;
+      document.getElementById('show-raster').addEventListener('change', (event) => {
+        map.setLayoutProperty('camera-count-raster', 'visibility',
+          event.target.checked ? 'visible' : 'none');
+        document.getElementById('legend').hidden = !event.target.checked;
+      });
+
+      map.addSource('camera-data', {
+        type: 'geojson',
+        data: 'data1/Automatic_Traffic_Safety_Cameras_(ATSC)_-_(ACTIVE).geojson'
+      });
+      map.addLayer({
+        id: 'traffic-cameras', type: 'circle', source: 'camera-data',
+        paint: {
+          'circle-radius': 5,
+          'circle-color': '#18364d',
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 1.5
+        }
+      });
+
+      map.on('click', 'traffic-cameras', (event) => {
+        const feature = event.features[0];
+        const properties = feature.properties || {};
+        const lines = Object.entries(properties)
+          .filter(([, value]) => value !== null && value !== '')
+          .map(([key, value]) => `${key}: ${value}`);
+        new maplibregl.Popup()
+          .setLngLat(feature.geometry.coordinates)
+          .setText(lines.length ? lines.join('\n') : 'Traffic camera')
+          .addTo(map);
+      });
+      map.on('mouseenter', 'traffic-cameras', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'traffic-cameras', () => {
+        map.getCanvas().style.cursor = '';
+      });
+
+      document.getElementById('camera-control').hidden = false;
+      document.getElementById('show-cameras').addEventListener('change', (event) => {
+        map.setLayoutProperty('traffic-cameras', 'visibility',
+          event.target.checked ? 'visible' : 'none');
+      });
+      document.getElementById('status').textContent =
+        'Click a camera point to inspect its available attributes.';
+    });
+  </script>
+</body>
+</html>
