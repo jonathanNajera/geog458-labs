@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jonathan Najera | Portfolio</title>
+<style>
+  :root {
+    --bg: #0f0f12;
+    --bg-alt: #17171c;
+    --text: #e8e8ec;
+    --muted: #a0a0ad;
+    --accent: #7c5cff;
+    --card: #1d1d24;
+    --border: #2a2a33;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+
+  header {
+    position: sticky;
+    top: 0;
+    background: rgba(15,15,18,0.9);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+  }
+
+  nav {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+  }
+
+  nav .logo { font-weight: 700; font-size: 1.2rem; }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  nav ul li a {
+    color: var(--text);
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  nav ul li a:hover { color: var(--accent); }
+
+  section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 5rem 1.5rem;
+  }
+
+  /* Hero */
+  #hero {
+    text-align: center;
+    padding-top: 7rem;
+  }
+
+  #hero h1 {
+    font-size: 2.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  #hero h1 span { color: var(--accent); }
+
+  #hero p {
+    color: var(--muted);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: 0.8rem 1.8rem;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+
+  .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+  .btn.outline {
+    background: transparent;
+    border: 1px solid var(--accent);
+    margin-left: 1rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--accent);
+    padding-left: 0.75rem;
+  }
+
+  /* About */
+  #about p { color: var(--muted); max-width: 700px; }
+
+  /* Projects */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .project-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+  }
+
+  .project-card h3 { margin-bottom: 0.5rem; }
+
+  .project-card p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .tags span {
+    background: var(--bg-alt);
+    color: var(--accent);
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  /* Skills */
+  .skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .skills-list span {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+
+  /* Contact */
+  #contact {
+    text-align: center;
+  }
+
+  #contact p { color: var(--muted); margin-bottom: 1.5rem; }
+
+  .socials {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    font-weight: 500;
+  }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 600px) {
+    nav ul { gap: 0.8rem; font-size: 0.85rem; }
+    #hero h1 { font-size: 2.1rem; }
+  }
+
+  /* Space cursor & starfield */
+  #starfield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    background: radial-gradient(ellipse at center, #15151c 0%, #0a0a0d 100%);
+  }
+
+  #cursor-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  body, a, .btn { cursor: none; }
+
+  @media (hover: none) {
+    body, a, .btn { cursor: auto; }
+    #cursor-canvas { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+<canvas id="cursor-canvas"></canvas>
+
+<header>
+  <nav>
+    <div class="logo">Jonathan Najera</div>
+    <ul>
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#leadership">Leadership</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section id="hero">
+  <h1>Hi, I'm <span>Jonathan Najera-Martinez</span></h1>
+  <p>Geography: Data Science @ UW Seattle &middot; Informatics Minor &middot; GIS &amp; Spatial Data Analysis</p>
+  <a href="#projects" class="btn">View My Work</a>
+  <a href="#contact" class="btn outline">Get In Touch</a>
+</section>
+
+<section id="about">
+  <h2>About Me</h2>
+  <p>
+    I'm a senior studying Geography: Data Science with a minor in Informatics at the University
+    of Washington, Seattle. I enjoy building geospatial data analysis projects with a humanitarian
+    focus, creating maps and spatial tools using QGIS, ArcGIS Pro, HTML, CSS, Carto, JavaScript, and Python.
+    I'm also passionate about teaching — I currently support undergraduate students as a TA for
+    Information Technology &amp; Public Policy at UW's Information School, helping them navigate
+    data safety, misinformation, and technology topics.
+  </p>
+</section>
+
+<section id="projects">
+  <h2>GIS Projects</h2>
+  <div class="projects-grid">
+
+    <div class="project-card">
+      <h3>Recreational Water Quality Map</h3>
+      <p>Created an interactive map joining King County's weekly bacteria sampling data (CFU/100mL) with beach parks data in Excel, then applied EPA/WA Ecology safety thresholds for public health analysis and official advisories.</p>
+      <div class="tags">
+        <span>Carto</span>
+        <span>Excel</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <h3>Global Earthquake Map</h3>
+      <p>Built an interactive globe using the USGS past-month earthquake feed, scaling circle size and color by magnitude, with legends and interactive city-level popups. (Oct 2026)</p>
+      <div class="tags">
+        <span>JavaScript</span>
+        <span>USGS GeoJSON</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <h3>World Cities and Megacities Map</h3>
+      <p>Mapped global city populations with graduated symbols to distinguish population ranges and highlight the world's megacities.</p>
+      <div class="tags">
+        <span>JavaScript</span>
+        <span>USGS GeoJSON</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <h3>Voting Access Equity Analysis</h3>
+      <p>Geoprocessed ballot drop box locations in King County against census tract data to explore voter access and turnout using buffer tools.</p>
+      <div class="tags">
+        <span>ArcGIS Pro</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="experience">
+  <h2>Work Experience</h2>
+  <div class="projects-grid">
+
+    <div class="project-card">
+      <h3>Undergraduate Teaching Assistant — INFO 200</h3>
+      <p><strong>The Information School, UW</strong> &middot; Aug 2026 – Present</p>
+      <p>
+        Hold weekly lab sections and office hours for undergraduate informatics students, leading
+        discussions and providing course material on topics such as <strong>Data Safety</strong>,
+        <strong>Misinformation</strong>, and other technology topics. Prepare and grade assignments,
+        maintain grade records, and calculate grades for 25 students. Translate technical material
+        for students from all majors.
+      </p>
+    </div>
+
+    <div class="project-card">
+      <h3>Undergraduate Research Assistant — Data Analyst &amp; Data Collection</h3>
+      <p><strong>Prof. Jennifer Lee Hoffman, UW</strong> &middot; Dec 2025 – May 2026</p>
+      <p>
+        Created a structured qualitative interview to examine the college sports environment and
+        students' sense of campus belonging; performed thematic coding to identify patterns across
+        user responses and organized interview data into defined topic categories/themes. Presented
+        findings at the UW Research Symposium 2026.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<section id="education">
+  <h2>Education</h2>
+  <div class="project-card" style="max-width: 700px;">
+    <h3>University of Washington, Seattle, Washington</h3>
+    <p>Bachelor of Arts in Geography: Data Science, Informatics Minor</p>
+    <p>- Dean's List, 4 Quarters</p>
+    <p>- Relevant Coursework: Geography Information &amp; Spatial Analysis, GIS and Mapping, Digital Geographies (GIS), Data Science Foundations (R programming), Research Methods, Geography of Housing, Data Management, Advanced Digital Geographies</p>
+  </div>
+</section>
+
+<section id="leadership">
+  <h2>Leadership &amp; Volunteering</h2>
+  <div class="projects-grid">
+    <div class="project-card">
+      <h3>Theta Delta Chi — House Manager &amp; Brotherhood Chair</h3>
+      <p>Manage a $6,000 yearly house operating budget and facilitate house improvement projects for a 50+ member historical fraternity home.</p>
+    </div>
+    <div class="project-card">
+      <h3>Community Involvement</h3>
+      <p>Volunteer English Language Teacher at Casa Latina (Seattle); Metro Parks Cross Country Coach; member of Green Greeks (Environmental Sustainability Club).</p>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <h2>Skills</h2>
+  <div class="skills-list">
+    <span>ArcGIS Pro</span>
+    <span>QGIS</span>
+    <span>Carto</span>
+    <span>JavaScript</span>
+    <span>Python</span>
+    <span>R Programming</span>
+    <span>Excel</span>
+    <span>GeoJSON</span>
+    <span>Geoprocessing</span>
+    <span>Spatial Analysis</span>
+    <span>Qualitative Research</span>
+    <span>Data Visualization</span>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Get In Touch</h2>
+  <p>jonathannajera253@gmail.com &middot; 253-204-9301 &middot; Seattle, Washington</p>
+  <a href="mailto:jonathannajera253@gmail.com" class="btn">Say Hello</a>
+  <div class="socials">
+    <a href="https://www.linkedin.com/in/jonathannajera253253/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="#">Resume</a>
+  </div>
+</section>
+
+<footer>
+  &copy; 2026 Jonathan Najera. Built with HTML &amp; CSS.
+</footer>
+
+<script>
+// ---------- Starfield background ----------
+(function () {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let w, h, stars;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    const count = Math.floor((w * h) / 2800);
+    stars = Array.from({ length: count }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 1.3 + 0.2,
+      baseAlpha: Math.random() * 0.6 + 0.3,
+      twinkleSpeed: Math.random() * 0.02 + 0.005,
+      phase: Math.random() * Math.PI * 2
+    }));
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, w, h);
+    for (const s of stars) {
+      const alpha = s.baseAlpha + Math.sin(t * s.twinkleSpeed + s.phase) * 0.3;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(235,235,255,${Math.max(0, alpha)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize();
+  initStars();
+  requestAnimationFrame(draw);
+})();
+
+// ---------- Space cursor with comet trail ----------
+(function () {
+  const canvas = document.getElementById('cursor-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  let mouseX = -100, mouseY = -100;
+  let particles = [];
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    // spawn a couple particles per move
+    for (let i = 0; i < 2; i++) {
+      particles.push({
+        x: mouseX + (Math.random() - 0.5) * 4,
+        y: mouseY + (Math.random() - 0.5) * 4,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6,
+        life: 1,
+        size: Math.random() * 2 + 1,
+        hue: 250 + Math.random() * 60 // purple/blue range
+      });
+    }
+  });
+
+  function tick() {
+    ctx.clearRect(0, 0, w, h);
+
+    // update + draw trail particles
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= 0.02;
+    });
+    particles = particles.filter(p => p.life > 0);
+
+    for (const p of particles) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue}, 90%, 70%, ${p.life})`;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = `hsla(${p.hue}, 90%, 70%, ${p.life})`;
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+
+    // glowing cursor core (little "star")
+    if (mouseX > -50) {
+      const grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 14);
+      grad.addColorStop(0, 'rgba(255,255,255,0.95)');
+      grad.addColorStop(0.3, 'rgba(180,150,255,0.6)');
+      grad.addColorStop(1, 'rgba(124,92,255,0)');
+      ctx.beginPath();
+      ctx.arc(mouseX, mouseY, 14, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(mouseX, mouseY, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+    }
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
